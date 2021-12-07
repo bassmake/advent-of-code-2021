@@ -25,12 +25,11 @@
 (defn provide-solution [file]
   (with-open
    [rdr (io/reader (str "src/day1/" file))]
-    (let [lines (line-seq rdr)
-          numbers (map #(Integer/parseInt %) lines)
-          pairs (make-pairs numbers)
-          changes (map compare-change pairs)
-          solution (count (filter #(= ::increased %) changes))]
-      solution)))
+    (let [changes (->> (line-seq rdr)
+                       (map #(Integer/parseInt %))
+                       (make-pairs)
+                       (map compare-change))]
+      (count (filter #(= ::increased %) changes)))))
 
 (provide-solution "input.txt")
 
