@@ -1,5 +1,5 @@
 (ns day1.main
-  (:require [clojure.java.io :as io]))
+  (:require [tools.main :as tools]))
 
 (defn make-pairs ([]
                   (fn [xf]
@@ -42,30 +42,27 @@
     :else ::unknown))
 
 (defn provide-solution-1 [file]
-  (with-open
-   [rdr (io/reader (str "src/day1/" file))]
-    (let [changes (->> (line-seq rdr)
-                       (map #(Integer/parseInt %))
-                       (make-pairs)
-                       (map compare-change))]
-      (count (filter #(= ::increased %) changes)))))
-
+  (tools/with-open-file (str "src/day1/" file)
+    (fn [lines]
+      (let [changes (->> lines
+                         (map #(Integer/parseInt %))
+                         (make-pairs)
+                         (map compare-change))]
+        (count (filter #(= ::increased %) changes))))))
 
 (defn provide-solution-2 [file]
-  (with-open
-   [rdr (io/reader (str "src/day1/" file))]
-    (let [changes (->> (line-seq rdr)
-                       (map #(Integer/parseInt %))
-                       (make-triplets)
-                       (map #(reduce + %))
-                       (make-pairs)
-                       (map compare-change))]
-      (count (filter #(= ::increased %) changes)))))
-
+  (tools/with-open-file (str "src/day1/" file)
+    (fn [lines]
+      (let [changes (->> lines
+                         (map #(Integer/parseInt %))
+                         (make-triplets)
+                         (map #(reduce + %))
+                         (make-pairs)
+                         (map compare-change))]
+        (count (filter #(= ::increased %) changes))))))
 
 (provide-solution-1 "input.txt")
 (provide-solution-2 "input.txt")
-
 
 (comment
   (make-pairs [1 2 3 4])
@@ -81,6 +78,8 @@
   (compare-change [2])
   (compare-change [])
 
+  (= (provide-solution-1 "input.txt") 1448)
+  (= (provide-solution-2 "input.txt") 1471)
 
   (provide-solution-1 "input-sample.txt")
   (provide-solution-2 "input-sample.txt"))
