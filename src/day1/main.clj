@@ -22,7 +22,7 @@
     (= first second) ::same
     :else ::unknown))
 
-(defn print-solution [file]
+(defn provide-solution [file]
   (with-open
    [rdr (io/reader (str "src/day1/" file))]
     (let [lines (line-seq rdr)
@@ -30,13 +30,13 @@
           pairs (make-pairs numbers)
           changes (map compare-change pairs)
           solution (count (filter #(= ::increased %) changes))]
-      (println solution))))
+      solution)))
 
-(print-solution "input.txt")
+(provide-solution "input.txt")
 
 (comment
   (make-pairs [1 2 3 4])
   (compare-change [2 3])
   (compare-change [2])
   (compare-change [])
-  (print-solution "test-input.txt"))
+  (provide-solution "input-sample.txt"))
