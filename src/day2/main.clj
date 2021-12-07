@@ -1,9 +1,9 @@
 (ns day2.main
-  (:use [clojure.string :only [split]])
-  (:require [tools.main :as tools]))
+  (:require [tools.main :as tools]
+            [clojure.string :as str]))
 
 (defn parse [line]
-  (let [[direction units] (split line #" ")]
+  (let [[direction units] (str/split line #" ")]
     {:direction direction :units (Integer/parseInt units)}))
 
 (defn move [position command]
