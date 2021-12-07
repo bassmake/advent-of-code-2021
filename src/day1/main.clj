@@ -1,32 +1,6 @@
 (ns day1.main
   (:require [clojure.java.io :as io]))
 
-(defn print-pairs [file]
-  (with-open
-   [rdr (io/reader (str "src/day1/" file))]
-    (let [lines (line-seq rdr)
-          pairs (make-pairs lines)]
-      (println pairs))))
-
-
-(print-pairs "test-input.txt")
-
-
-
-(def xf (comp (filter odd?) (map inc)))
-
-(->> (range 12)
-     (filter odd?)
-     (map inc))
-
-(transduce xf + (range 5))
-
-(transduce xf + 100 (range 5))
-
-(into [] xf (range 10))
-
-(sequence xf (range 10))
-
 (defn make-pairs ([]
                   (fn [xf]
                     (let [prev (volatile! ::none)]
@@ -41,5 +15,28 @@
                              (xf result [prior input]))))))))
   ([coll] (sequence (make-pairs) coll)))
 
+(defn compare-change [[first second]]
+  (cond
+    (> first second) ::decreased
+    (< first second) ::increased
+    (= first second) ::same
+    :else ::unknown))
+
+(defn print-solution [file]
+  (with-open
+   [rdr (io/reader (str "src/day1/" file))]
+    (let [lines (line-seq rdr)
+          numbers (map #(Integer/parseInt %) lines)
+          pairs (make-pairs numbers)
+          changes (map compare-change pairs)
+          solution (count (filter #(= ::increased %) changes))]
+      (println solution))))
+
+(print-solution "input.txt")
+
 (comment
-  (make-pairs [1 2 3 4]))
+  (make-pairs [1 2 3 4])
+  (compare-change [2 3])
+  (compare-change [2])
+  (compare-change [])
+  (print-solution "test-input.txt"))
