@@ -7,8 +7,13 @@
    [rdr (io/reader file)]
     (fn (line-seq rdr))))
 
+(defn to-int [str]
+  (Integer/parseInt str))
+
 (comment
   (defn print-lines [lines]
     (println lines))
+
+  (to-int "3")
 
   (with-open-file "src/tools/test.txt" print-lines))
