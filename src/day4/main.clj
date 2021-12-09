@@ -38,7 +38,7 @@
         summed (reduce + (map #(or % 0) flattened))]
     (* number summed)))
 
-(defn winning-board [file]
+(defn first-winning-board [file]
   (let [input (load-input file)
         numbers (:numbers input)
         boards (:boards input)]
@@ -50,15 +50,33 @@
                   new-boards)))
             boards numbers)))
 
-(defn solution1 [file]
-  (let [winning-board (winning-board file)]
+(defn last-winning-board [file]
+  (let [input (load-input file)
+        numbers (:numbers input)
+        boards (:boards input)]
+    (reduce (fn [boards number]
+              (let [new-boards (make-draw boards number)
+                    not-winning-boards (remove wins? new-boards)]
+                ;; (pp/pprint {:number number :new-boards new-boards :winning-board winning-board})
+                (if (empty? not-winning-boards)
+                  (reduced {:board (first new-boards) :number number})
+                  not-winning-boards)))
+            boards numbers)))
+
+
+(defn solution [fn file]
+  (let [winning-board (fn file)]
+    ;; {:winning winning-board}))
     {:winning winning-board
      :score (score (:board winning-board) (:number winning-board))}))
 
 (comment
 
-  (pp/pprint (solution1 "input-sample.txt"))
-  (pp/pprint (solution1 "input.txt"))
+  (pp/pprint (solution last-winning-board "input-sample.txt"))
+  (pp/pprint (solution last-winning-board "input.txt"))
+
+  (pp/pprint (solution first-winning-board "input-sample.txt"))
+  (pp/pprint (solution first-winning-board "input.txt"))
 
   (replace {3 nil} [1 2 4 3])
 
