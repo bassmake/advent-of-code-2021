@@ -33,23 +33,32 @@
     (or (wins-lines? board)
         (wins-lines? (apply map list board)))))
 
-(defn score [board number])
+(defn score [board number]
+  (let [flattened (flatten board)
+        summed (reduce + (map #(or % 0) flattened))]
+    (* number summed)))
 
-(defn solution1 [file]
+(defn winning-board [file]
   (let [input (load-input file)
         numbers (:numbers input)
         boards (:boards input)]
-    (reduce  (fn [boards number]
-               (let [new-boards (make-draw boards number)
-                     winning-board (first (filter wins? new-boards))]
-                 (if (some? winning-board)
-                   (reduced {:board winning-board :number number})
-                   new-boards)))
-             boards numbers)))
+    (reduce (fn [boards number]
+              (let [new-boards (make-draw boards number)
+                    winning-board (first (filter wins? new-boards))]
+                (if (some? winning-board)
+                  (reduced {:board winning-board :number number})
+                  new-boards)))
+            boards numbers)))
+
+(defn solution1 [file]
+  (let [winning-board (winning-board file)]
+    {:winning winning-board
+     :score (score (:board winning-board) (:number winning-board))}))
 
 (comment
 
   (pp/pprint (solution1 "input-sample.txt"))
+  (pp/pprint (solution1 "input.txt"))
 
   (replace {3 nil} [1 2 4 3])
 
