@@ -22,8 +22,11 @@
     {:numbers (map #(Integer/parseInt %) (str/split numbers #","))
      :boards (map load-board boards)}))
 
-(defn mark-number [draw]
-  (map #(replace {(:number draw) nil} %) (:board draw)))
+(defn mark-number [number board]
+  (map #(replace {number nil} %) board))
+
+(defn make-draw [boards number]
+  (map #(mark-number number %) boards))
 
 (defn wins? [board]
   (letfn [(wins-lines? [b] (some? (some #(every? nil? %) b)))]
@@ -35,10 +38,14 @@
 (defn solution1 [file]
   (let [input (load-input file)
         numbers (:numbers input)
-        boards (:boards input)
-        draws (for [number numbers board boards] {:number number :board board})]
-    ;; draws))
-    (map mark-number  draws)))
+        boards (:boards input)]
+    (reduce  (fn [boards number]
+               (let [new-boards (make-draw boards number)
+                     winning-board (first (filter wins? new-boards))]
+                 (if (some? winning-board)
+                   (reduced {:board winning-board :number number})
+                   new-boards)))
+             boards numbers)))
 
 (comment
 
@@ -52,5 +59,7 @@
   (wins? [[3 2 5] [nil nil nil]])
   (wins? [[nil 2 5] [nil 1 3]])
   (apply map list [[nil 2 5] [nil 1 3]])
+
+  (mark-number 3 [[1 3 4] [3 2 5]])
 
   (load-board-line " 9 18 13 17  5"))
