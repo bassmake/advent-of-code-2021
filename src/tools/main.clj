@@ -1,5 +1,6 @@
 (ns tools.main
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [clojure.pprint :as pp]))
 
 
 (defn with-open-file [file fn]
@@ -9,6 +10,9 @@
 
 (defn to-int [str]
   (Integer/parseInt str))
+
+(defn log [data log?]
+  (when log? (pp/pprint data)))
 
 (comment
   (defn print-lines [lines]
