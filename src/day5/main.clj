@@ -14,26 +14,32 @@
   (or (= x1 x2) (= y1 y2)))
 
 (defn is-diagonal? [{x1 :x1 y1 :y1 x2 :x2 y2 :y2}]
-  (or (and (= x1 y1) (= x2 y2))
-      (and (= x1 y2) (= x2 y1))))
+  (= (Math/abs (- x2 x1)) (Math/abs (- y2 y1))))
+  ;; (or (and (= x1 y1) (= x2 y2))
+  ;;     (and (= x1 y2) (= x2 y1))
+
 
 (defn all-points [coordinates]
   (tools/log coordinates false)
   (let [{x1 :x1 y1 :y1 x2 :x2 y2 :y2} coordinates
-        start-x (min x1 x2)
-        vector-x (- (max x1 x2) start-x)
-        step-x (if (= vector-x 0) 0 1)
-        move-x (fn [step] (+ start-x (* step step-x)))
-        start-y (min y1 y2)
-        vector-y (- (max y1 y2) start-y)
-        step-y (if (= vector-y 0) 0 1)
-        move-y (fn [step] (+ start-y (* step step-y)))
-        vector-range (range 0 (inc (max vector-x vector-y)))]
+        vector-x (- x2 x1)
+        vector-y (- y2 y1)
+        step-x (cond (< vector-x 0) -1
+                     (> vector-x 0) 1
+                     :else 0)
+        step-y (cond (< vector-y 0) -1
+                     (> vector-y 0) 1
+                     :else 0)
+        move-x (fn [step] (+ x1 (* step step-x)))
+        move-y (fn [step] (+ y1 (* step step-y)))
+        vector-range (range 0 (inc (max (* step-x vector-x) (* step-y vector-y))))]
     (for [step vector-range]
       {:x (move-x step) :y (move-y step)})))
 
 (defn append-point [points point]
-  (update points point #(inc (or % 0))))
+  (let [new-points (update points point #(inc (or % 0)))]
+    (tools/log new-points false)
+    new-points))
 
 (defn solution1 [lines]
   (->> lines
@@ -45,6 +51,10 @@
        (flatten)
       ;;  (doall)))
        (reduce append-point {})
+       (into (sorted-map-by
+              (fn [{x1 :x y1 :y} {x2 :x y2 :y}]
+                (if (= x1 x2) (compare y1 y2) (compare x1 x2)))))
+      ;;  (#(do (tools/log % true) %))
        (filter (fn [[_ v]] (> v 1)))
        (count)))
 
@@ -56,7 +66,13 @@
   (tools/log (provide-solution solution1 "input-sample.txt") true)
   (tools/log (provide-solution solution1 "input.txt") true)
 
+  (Math/abs -11)
   (or 0 1)
   (all-points {:x1 3 :y1 4 :x2 1 :y2 4})
+  (all-points {:x1 1 :y1 4 :x2 3 :y2 4})
+  (all-points {:x1 3 :y1 4 :x2 3 :y2 6})
+  (all-points {:x1 3 :y1 16 :x2 3 :y2 6})
+  (all-points {:x1 1 :y1 1 :x2 4 :y2 4})
+  (all-points {:x1 1 :y1 3 :x2 3 :y2 1})
   (max 1 2)
   (range 7 7 1))
