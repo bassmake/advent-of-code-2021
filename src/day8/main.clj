@@ -1,7 +1,5 @@
 (ns day8.main
-  (:require [tools.main :as t]
-            [clojure.set :as set]
-            [clojure.pprint :as pp]
+  (:require [clojure.pprint :as pp]
             [clojure.string :as s]))
 
 
