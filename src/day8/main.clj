@@ -12,49 +12,62 @@
     {:patterns patterns
      :output output}))
 
-
-(defn only-subset
-  ([patterns contains]
-   (->> patterns
-        (filter #(set/subset? contains %))
-        (first)))
-  ([patterns not-contains contains]
-   (let [filtered (filter #(not= not-contains %) patterns)]
-     (only-subset filtered contains))))
-
 (defn produce-mapping [patterns]
-  (letfn [(patterns-of-size [size] (map set (get patterns size)))
-          (single [size]  (first (patterns-of-size size)))]
-    (let [one (single 2)
-          seven (single 3)
-          eight (single 7)
-          four (single 4)
-          three (only-subset (patterns-of-size 5) one)
-          nine (only-subset (patterns-of-size 6) four)
-          three (only-subset (patterns-of-size 5) three one)]
-      {:one one
-       :three three
-       :four four
-       :seven seven
-       :eight eight
-       :nine nine})))
+  (let [four (first (filter #(= 4 (count %)) patterns))]
+    (letfn [(identify-values [[from count]]
+              [from (case count
+                      4 \e
+                      6 \b
+                      7 (if (some #{from} four) \d \g)
+                      8 (if (some #{from} four) \c \a)
+                      9 \f)])]
+      (->> patterns
+           (map vec)
+           (flatten)
+           (group-by identity)
+           (map (fn [[k v]] [k (count v)]))
+           (map (fn [count] (identify-values count)))
+           (into {})))))
 (comment
-  (produce-mapping {5 ["cdfbe" "gcdfa" "fbcad"]
-                    3 ["dab"]
-                    7 ["acedgfb"]
-                    2 ["ab"]
-                    6 ["cefabd" "cdfgeb" "cagedb"]
-                    4 ["eafb"]}))
+  (produce-mapping (:patterns (parse-line "gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce"))))
 
 
-(defn parse-and-group-line  [line]
+(defn decode [input mapping]
+  (let [decoded (->> (vec input)
+                     (map mapping)
+                     (sort)
+                     (apply str))]
+    (case decoded
+      "abcefg" 0
+      "cf" 1
+      "acdeg" 2
+      "acdfg" 3
+      "bcdf" 4
+      "abdfg" 5
+      "abdefg" 6
+      "acf" 7
+      "abcdefg" 8
+      "abcdfg" 9)))
+
+(comment ; d-a e-b a-c f-d g-e b-f c-g
+  (decode "fdgacbe" {\a \c, \c \g, \e \b, \d \a, \g \e, \f \d, \b \f})
+  (decode "fbcad" {\a \c, \c \g, \e \b, \d \a, \g \e, \f \d, \b \f})
+  (decode "cdfbe" {\a \c, \c \g, \e \b, \d \a, \g \e, \f \d, \b \f}))
+
+(defn parse-and-decode  [line]
   (let [parsed (parse-line line)
         patterns (:patterns parsed)
-        grouped-patterns (group-by count patterns)
-        output (:output parsed)]
-    {:patterns grouped-patterns
-     :mapping (produce-mapping grouped-patterns)
-     :ouptput output}))
+        output (:output parsed)
+        mapping (produce-mapping patterns)
+        decoded (apply str (map #(decode % mapping) output))]
+    {:patterns patterns
+     :ouptput output
+     :mapping mapping
+     :decoded-output (Integer/parseInt decoded)}))
+
+(comment
+  (pp/pprint
+   (parse-and-decode "gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce")))
 
 (defn solution1 [file]
   (->> (s/split-lines (slurp (str "src/day8/" file)))
@@ -68,8 +81,10 @@
 
 (defn solution2 [file]
   (->> (s/split-lines (slurp (str "src/day8/" file)))
-       (map parse-and-group-line)))
-
+      ;;  (#(do (pp/pprint %) %))
+       (map parse-and-decode)
+       (map :decoded-output)
+       (reduce +)))
 
 (comment
 
@@ -84,5 +99,19 @@
 
   (count "fcge")
   (contains? [2 3 4 7] 7)
+
+;;  dddd (A)
+;; e B   a C
+;; e    a
+;;  ffff D
+;; g E   b F
+;; g    b
+;;  cccc G
+;; 
+
+
+
+;; ([\a 8] [\c 7] [\e 6] [\d 8] [\g 4] [\f 7] [\b 9])
+  (vec "eafb")
 
   (parse-line "be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe"))
