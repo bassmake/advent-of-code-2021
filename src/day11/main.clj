@@ -3,13 +3,45 @@
    [clojure.pprint :as pp]
    [clojure.string :as s]))
 
-(defn increase-energy [octopuses]
-  (map (fn [row] (map inc row)) octopuses))
+
+(defn map-opuses [f opuses]
+  (map (fn [row] (map f row)) opuses))
+
+(defn increase-energy [opuses]
+  (map-opuses inc opuses))
 (comment
   (increase-energy [[1 2] [3 4]]))
 
+(defn to-flash [opuses]
+  (->> (map-opuses (fn [opus] (if (= opus 9) 1 0)) opuses)
+       (flatten)
+       (reduce +)))
+(comment
+  (to-flash [[9 2 9] [1 3 4]]))
 
-(defn reset-flashed [octopuses]
-  (map (fn [row] (map (fn [octopus] (or octopus 0)) row)) octopuses))
+(defn flash [opuses]
+  opuses)
+
+(defn reset-flashed [opuses]
+  (map-opuses (fn [opus] (or opus 0)) opuses))
 (comment
   (reset-flashed [[nil 2] [3 nil]]))
+
+
+(defn step [opuses]
+  (let [energized (increase-energy opuses)]
+    (loop [ops energized flashes 0])
+
+
+
+    {:flashes (:flashes flashed)
+     :opuses (reset-flashed  (:opuses opuses))}))
+
+
+(comment
+  (defn fact [n]
+    (loop [cnt n acc 1]
+      (if (pos? cnt)
+        (recur (dec cnt) (* acc cnt)) acc)))
+
+  (fact 16))
